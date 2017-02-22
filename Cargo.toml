@@ -1,0 +1,7 @@
+[package]
+name = "shishi"
+version = "0.1.0"
+authors = ["Ben Zhang <benzh@cs.berkeley.edu>"]
+
+[dependencies]
+ws = "0.6.0"
