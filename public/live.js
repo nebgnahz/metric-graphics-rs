@@ -1,27 +1,68 @@
-var data = [];
-var i = 0;
-var interval;
-interval = setInterval(function() {
-    var date = new Date();
-    var value = Math.sin(i / 100 * 2 * Math.PI);
-    i++;
-    data.push({'date': date, 'value': value});
-}, 100);
+// Global state SS: Shishi
+var SS = {
+    sourceFunc: null,
+    drawFunc: null,
+    data: [],
 
-setInterval(function() {
-    MG.data_graphic({
-        title: "Line Chart",
-        description: "This is a simple line chart.",
-        area: false,
-        data: data,
-        width: 600,
-        height: 200,
-        right: 40,
-        target: document.getElementById('figure'),
-        x_accessor: 'date',
-        y_accessor: 'value'
-    });
-}, 1000);
+    i: 0
+}
+
+function startLive(ss) {
+    ss.sourceFunc = setInterval(function() {
+        var date = new Date();
+        var value = Math.sin(ss.i / 100 * 2 * Math.PI);
+
+        ss.i++;
+        ss.data.push({'date': date, 'value': value});
+    }, 100);
+
+    ss.drawFunc = setInterval(function() {
+        var one_minute = 10 * 1000;  // ms
+        var now = new Date();
+        ss.data = ss.data.filter((d) => (now - d.date) < one_minute);
+        MG.data_graphic({
+            title: "Line Chart",
+            description: "This is a simple line chart.",
+            data: ss.data,
+            animate_on_load: false,
+            transition_on_update: false,
+            full_width: true,
+            height: 600,
+            // missing_is_hidden: true,
+            area: false,
+            target: document.getElementById('figure'),
+            x_accessor: 'date',
+            y_accessor: 'value'
+        });
+    }, 30);
+}
+
+function stopLive(ss) {
+    clearInterval(ss.sourceFunc);
+    ss.sourceFunc = null;
+    clearInterval(ss.drawFunc);
+    ss.drawFunc = null;
+
+    var date = new Date();
+    var value = null;
+
+    ss.data.push({'date': date, 'value': value});
+}
+
+function isLive(ss) {
+    return (ss.sourceFunc !== null && ss.drawFunc !== null);
+}
+
+startLive(SS);
+function toggleLive() {
+    if (isLive(SS)) {
+        stopLive(SS);
+        $("#stopButton").html("Resume");
+    } else {
+        startLive(SS);
+        $("#stopButton").html("Stop");
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //

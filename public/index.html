@@ -13,6 +13,8 @@
           rel="stylesheet" type="text/css">
 
     <!------------- CSS: Bootstrap, Font Awesome  -------------->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css"
+          rel="stylesheet" type="text/css">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
           rel="stylesheet" type="text/css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
@@ -28,10 +30,23 @@
     <!------------- MetricGraphics  -------------->
     <link href="dist/metricsgraphics.css" rel="stylesheet" type="text/css">
     <script src="dist/metricsgraphics.min.js"></script>
+
+    <!------------- MetricGraphics  -------------->
+    <link href="css/custom.css" rel="stylesheet" type="text/css">
   </head>
 
   <body>
     <script src="live.js"></script>
-    <div id="figure"></div>
+    <div class="container">
+      <section class="header">
+        <h2 class="title">A simple, live metric viewer</h2>
+      </section>
+      <button class="button-primary" id="stopButton" onclick="toggleLive();">
+        Stop
+      </button>
+      <div class="row">
+        <div id="figure"></div>
+      </div>
+    </div>
   </body>
 </html>
