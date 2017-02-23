@@ -8,6 +8,7 @@ extern crate staticfile;
 extern crate time;
 extern crate ws;
 extern crate rand;
+extern crate serde;
 
 use mount::Mount;
 use staticfile::Static;
@@ -27,20 +28,24 @@ fn unix_time_format_ms(t: time::Timespec) -> i64 {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Dummy {
-    // Unix timestamp
+struct Datum<T>
+    where T: serde::Serialize + serde::Deserialize
+{
     date: i64,
-    // Dummy value for now
-    value: f64,
+    value: T,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct History {
-    q: VecDeque<Dummy>,
+struct History<T>
+    where T: serde::Serialize + serde::Deserialize
+{
+    q: VecDeque<Datum<T>>,
     s: usize,
 }
 
-impl History {
+impl<T> History<T>
+    where T: serde::Serialize + serde::Deserialize
+{
     fn new(size: usize) -> Self {
         History {
             q: VecDeque::with_capacity(size),
@@ -48,7 +53,7 @@ impl History {
         }
     }
 
-    fn add(&mut self, d: Dummy) {
+    fn add(&mut self, d: Datum<T>) {
         self.q.push_back(d)
     }
 
@@ -58,21 +63,29 @@ impl History {
 }
 
 #[derive(Clone)]
-pub struct Ss {
-    inner: Arc<Mutex<SsInner>>,
+pub struct Ss<T>
+    where T: serde::Serialize + serde::Deserialize
+{
+    inner: Arc<Mutex<SsInner<T>>>,
 }
 
-pub struct SsInner {
-    h: History,
+pub struct SsInner<T>
+    where T: serde::Serialize + serde::Deserialize
+{
+    h: History<T>,
     conn: Vec<ws::Sender>,
 }
 
-struct SsHandler {
+struct SsHandler<T>
+    where T: serde::Serialize + serde::Deserialize
+{
     id: usize,
-    ss: Arc<Mutex<SsInner>>,
+    ss: Arc<Mutex<SsInner<T>>>,
 }
 
-impl Ss {
+impl<T> Ss<T>
+    where T: serde::Serialize + serde::Deserialize
+{
     fn new() -> Self {
         Ss {
             inner: Arc::new(Mutex::new(SsInner {
@@ -82,11 +95,11 @@ impl Ss {
         }
     }
 
-    pub fn send(&mut self, v: f64) {
+    pub fn send(&mut self, t: T) {
         let mut inner = self.inner.lock().unwrap();
-        let d = Dummy {
+        let d = Datum {
             date: unix_time_now(),
-            value: v,
+            value: t,
         };
         let msg = ws::Message::Text(json!(d).to_string());
         (*inner).h.add(d);
@@ -95,7 +108,7 @@ impl Ss {
         }
     }
 
-    fn handle(&mut self, conn: ws::Sender) -> SsHandler {
+    fn handle(&mut self, conn: ws::Sender) -> SsHandler<T> {
         let mut inner = self.inner.lock().unwrap();
         (*inner).conn.push(conn);
         SsHandler {
@@ -105,7 +118,9 @@ impl Ss {
     }
 }
 
-impl ws::Handler for SsHandler {
+impl<T> ws::Handler for SsHandler<T>
+    where T: serde::Serialize + serde::Deserialize
+{
     fn on_open(&mut self, _shake: ws::Handshake) -> ws::Result<()> {
         let inner = self.ss.lock().unwrap();
         (*inner).conn[self.id].send(ws::Message::Text((*inner).h.to_string()))
@@ -140,6 +155,6 @@ fn main() {
     loop {
         ::std::thread::sleep(::std::time::Duration::from_secs(1));
 
-        ss.send(rng.gen::<f64>());
+        ss.send((rng.gen::<f64>(), rng.gen::<f64>()));
     }
 }

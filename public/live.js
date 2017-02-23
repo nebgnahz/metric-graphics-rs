@@ -19,33 +19,33 @@ function startLive(ss) {
     //     ss.data.push({'date': date, 'value': value});
     // }, 100);
 
-    ss.drawFunc = setInterval(function() {
-        var one_minute = 10 * 1000;  // ms
-        var now = new Date();
-        ss.data = ss.data.filter((d) => (now - d.date) < one_minute);
-        if (ss.data.length !== 0) {
-            MG.data_graphic({
-                title: "Metrics",
-                description: "Measurements",
-                data: ss.data,
-                animate_on_load: false,
-                transition_on_update: false,
-                full_width: true,
-                height: 600,
-                // missing_is_hidden: true,
-                area: false,
-                target: document.getElementById('figure'),
-                x_accessor: 'date',
-                y_accessor: 'value'
-            });
-        }
-    }, 1000);
-
     if (ss.socket === null) {
         ss.socket = new WebSocket("ws://127.0.0.1:3012");
         ss.socket.onmessage = (e) => appendDataFromWSEvent(ss, e);
     } else {
         ss.socket.onmessage = (e) => appendDataFromWSEvent(ss, e);
+    }
+}
+
+function draw(ss) {
+    var one_minute = 10 * 1000;  // ms
+    var now = new Date();
+    ss.data = ss.data.filter((d) => (now - d.date) < one_minute);
+    if (ss.data.length !== 0) {
+        MG.data_graphic({
+            title: "Metrics",
+            description: "Measurements",
+            data: ss.data,
+            animate_on_load: false,
+            transition_on_update: false,
+            full_width: true,
+            height: 600,
+            // missing_is_hidden: true,
+            area: false,
+            target: document.getElementById('figure'),
+            x_accessor: 'date',
+            y_accessor: 'value'
+        });
     }
 }
 
@@ -87,10 +87,13 @@ function appendDataFromWSEvent(ss, event) {
     // parse message as JSON
     var data = JSON.parse(event.data);
     if (Array.isArray(data)) {
-        data = data.map((unix_ts) => new Date(unix_ts))
-        ss.data.push(...data);
+        // data.forEach((p, i, a) => a[i].date = new Date(a[i].date));
+        // ss.data.push(...data);
     } else {
         data.date = new Date(data.date)
+        data.value = data.value[0];
         ss.data.push(data);
     }
+
+    draw(ss);
 }
