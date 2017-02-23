@@ -7,6 +7,7 @@ extern crate mount;
 extern crate staticfile;
 extern crate time;
 extern crate ws;
+extern crate rand;
 
 use mount::Mount;
 use staticfile::Static;
@@ -15,6 +16,7 @@ use std::path::Path;
 use iron::Iron;
 use std::collections::VecDeque;
 use std::sync::{Arc, Mutex};
+use rand::Rng;
 
 fn unix_time_now() -> i64 {
     unix_time_format_ms(time::get_time())
@@ -27,9 +29,9 @@ fn unix_time_format_ms(t: time::Timespec) -> i64 {
 #[derive(Serialize, Deserialize, Debug)]
 struct Dummy {
     // Unix timestamp
-    ts: i64,
+    date: i64,
     // Dummy value for now
-    val: f64,
+    value: f64,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -83,8 +85,8 @@ impl Ss {
     pub fn send(&mut self, v: f64) {
         let mut inner = self.inner.lock().unwrap();
         let d = Dummy {
-            ts: unix_time_now(),
-            val: v,
+            date: unix_time_now(),
+            value: v,
         };
         let msg = ws::Message::Text(json!(d).to_string());
         (*inner).h.add(d);
@@ -134,9 +136,10 @@ fn main() {
         }
     });
 
+    let mut rng = rand::thread_rng();
     loop {
         ::std::thread::sleep(::std::time::Duration::from_secs(1));
-        println!("sending 0.3");
-        ss.send(0.3);
+
+        ss.send(rng.gen::<f64>());
     }
 }
