@@ -6,28 +6,32 @@
     <meta name="description" content="Live Plotting with Websocket">
     <meta name="author" content="Ben Zhang">
 
+    <!------------- font -------------->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,700"
           rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=PT+Serif:400,700,400italic"
           rel="stylesheet" type="text/css">
+
+    <!------------- CSS: Bootstrap, Font Awesome  -------------->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          rel="stylesheet" type="text/css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
           rel="stylesheet" type="text/css">
-    <link href=""
-          rel="stylesheet" type="text/css">
 
-    <link href="dist/metricsgraphics.css" rel="stylesheet" type="text/css">
-
+    <!------------- JS: JQuery, D3  -------------->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js">
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.6.0/d3.min.js"
             charset="utf-8">
     </script>
-    <script src="/dist/metricsgraphics.min.js"></script>
+
+    <!------------- MetricGraphics  -------------->
+    <link href="dist/metricsgraphics.css" rel="stylesheet" type="text/css">
+    <script src="dist/metricsgraphics.min.js"></script>
   </head>
 
   <body>
     <script src="live.js"></script>
-    <div id="fake_users1"></div>
-    <div class="data-column"><a href="fake_users1.json">data</a></div>
+    <div id="figure"></div>
   </body>
 </html>

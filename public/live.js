@@ -17,11 +17,11 @@ setInterval(function() {
         width: 600,
         height: 200,
         right: 40,
-        target: document.getElementById('fake_users1'),
+        target: document.getElementById('figure'),
         x_accessor: 'date',
         y_accessor: 'value'
     });
-}, 2000);
+}, 1000);
 
 ////////////////////////////////////////////////////////////////////////////////
 //
