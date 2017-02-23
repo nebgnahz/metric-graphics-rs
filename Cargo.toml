@@ -4,7 +4,11 @@ version = "0.1.0"
 authors = ["Ben Zhang <benzh@cs.berkeley.edu>"]
 
 [dependencies]
-ws = "0.6.0"
-staticfile = "0.4.0"
 iron = "0.5.1"
 mount = "0.3.0"
+serde = "0.9"
+serde_derive = "0.9"
+serde_json = "0.9"
+staticfile = "0.4.0"
+time = "0.1.36"
+ws = "0.6.0"

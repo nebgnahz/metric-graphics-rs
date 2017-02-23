@@ -34,7 +34,7 @@ function startLive(ss) {
             x_accessor: 'date',
             y_accessor: 'value'
         });
-    }, 30);
+    }, 1000);
 }
 
 function stopLive(ss) {
