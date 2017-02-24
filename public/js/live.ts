@@ -49,7 +49,8 @@ class SS {
     draw() {
         var one_minute = 10 * 1000;  // ms
         var now = new Date();
-        this.data = this.data.filter((d) => (now.valueOf() - d.date.valueOf()) < one_minute);
+        var last_minute = (d) => (now.valueOf() - d.date.valueOf()) < one_minute;
+        this.data = this.data.filter(last_minute);
         if (this.data.length !== 0) {
             window["MG"].data_graphic({
                 title: "Metrics",
