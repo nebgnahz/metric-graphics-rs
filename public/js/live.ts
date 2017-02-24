@@ -18,12 +18,14 @@ function getContentDim(data) {
         var dim = 0;
         if (isNumber(data.value)) {
             return 1;
+        } else if (Array.isArray(data.value)) {
+            // If data.value is array, look into each item's dim
+            return data.value.length;
+        } else if (data.value instanceof Object) {
+            return Object.keys(data.value).length;
         } else {
-            data.value.forEach(function(value, i) {
-                dim++;
-            });
+            alert("unsupported data type");
         }
-        return dim;
     }
 }
 
