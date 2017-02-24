@@ -70,7 +70,7 @@ class SS {
     }
 }
 
-let ss = new SS("ws://127.0.0.1:3012");
+let ss = new SS("ws://" + window.location.hostname + ":3012");
 
 function toggleLive() {
     if (ss.live) {

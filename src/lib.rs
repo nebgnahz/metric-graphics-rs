@@ -61,40 +61,40 @@ impl<T> History<T>
     }
 }
 
-pub struct Ss<T>
+pub struct MetricGraphics<T>
     where T: serde::Serialize + serde::Deserialize + Send
 {
-    inner: Arc<Mutex<SsInner<T>>>,
+    inner: Arc<Mutex<MetricGraphicsInner<T>>>,
 }
 
-impl<T> Clone for Ss<T>
+impl<T> Clone for MetricGraphics<T>
     where T: serde::Serialize + serde::Deserialize + Send
 {
-    fn clone(&self) -> Ss<T> {
-        Ss { inner: self.inner.clone() }
+    fn clone(&self) -> MetricGraphics<T> {
+        MetricGraphics { inner: self.inner.clone() }
     }
 }
 
-pub struct SsInner<T>
+pub struct MetricGraphicsInner<T>
     where T: serde::Serialize + serde::Deserialize + Send
 {
     h: History<T>,
     conn: Vec<ws::Sender>,
 }
 
-struct SsHandler<T>
+struct MetricGraphicsHandler<T>
     where T: serde::Serialize + serde::Deserialize + Send
 {
     id: usize,
-    ss: Arc<Mutex<SsInner<T>>>,
+    mg: Arc<Mutex<MetricGraphicsInner<T>>>,
 }
 
-impl<T> Ss<T>
+impl<T> MetricGraphics<T>
     where T: serde::Serialize + serde::Deserialize + Send
 {
     fn new() -> Self {
-        Ss {
-            inner: Arc::new(Mutex::new(SsInner {
+        MetricGraphics {
+            inner: Arc::new(Mutex::new(MetricGraphicsInner {
                 h: History::new(1024),
                 conn: Vec::with_capacity(1024),
             })),
@@ -114,31 +114,31 @@ impl<T> Ss<T>
         }
     }
 
-    fn handle(&mut self, conn: ws::Sender) -> SsHandler<T> {
+    fn handle(&mut self, conn: ws::Sender) -> MetricGraphicsHandler<T> {
         let mut inner = self.inner.lock().unwrap();
         (*inner).conn.push(conn);
-        SsHandler {
+        MetricGraphicsHandler {
             id: (*inner).conn.len() - 1,
-            ss: self.inner.clone(),
+            mg: self.inner.clone(),
         }
     }
 }
 
-impl<T> ws::Handler for SsHandler<T>
+impl<T> ws::Handler for MetricGraphicsHandler<T>
     where T: serde::Serialize + serde::Deserialize + Send
 {
     fn on_open(&mut self, _shake: ws::Handshake) -> ws::Result<()> {
-        let inner = self.ss.lock().unwrap();
+        let inner = self.mg.lock().unwrap();
         (*inner).conn[self.id].send(ws::Message::Text((*inner).h.to_string()))
     }
 
     fn on_message(&mut self, msg: ws::Message) -> ws::Result<()> {
-        let inner = self.ss.lock().unwrap();
+        let inner = self.mg.lock().unwrap();
         (*inner).conn[self.id].send(msg)
     }
 }
 
-pub fn init<T, A>(addr: A) -> Ss<T>
+pub fn init<T, A>(addr: A) -> MetricGraphics<T>
     where T: serde::Serialize + serde::Deserialize + Send + 'static,
           A: ToSocketAddrs + Send + 'static
 {
@@ -150,15 +150,15 @@ pub fn init<T, A>(addr: A) -> Ss<T>
         Iron::new(mount).http(addr).unwrap();
     });
 
-    let ss = Ss::new();
+    let mg = MetricGraphics::new();
 
     // Websocket thread
-    let mut ss_clone = ss.clone();
+    let mut mg_clone = mg.clone();
     ::std::thread::spawn(move || {
-        if let Err(error) = listen("127.0.0.1:3012", |out| ss_clone.handle(out)) {
+        if let Err(error) = listen("127.0.0.1:3012", |out| mg_clone.handle(out)) {
             println!("Failed to create WebSocket due to {:?}", error);
         }
     });
 
-    ss
+    mg
 }
