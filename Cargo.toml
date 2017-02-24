@@ -1,5 +1,5 @@
 [package]
-name = "metric-graphics"
+name = "metrics-graphics"
 version = "0.1.0"
 authors = ["Ben Zhang <benzh@cs.berkeley.edu>"]
 
