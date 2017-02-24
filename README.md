@@ -25,7 +25,7 @@ mg.send(0.5);
 Then open your browser at [http://127.0.0.1:3000](http://127.0.0.1:3000), you
 will be able to see the metrics visualization (only a single point here).
 
-Below is an example with some synthetic live data:
+Below is an example with some synthetic (random) live data:
 
 ```rust
 extern crate rand;
@@ -37,7 +37,7 @@ fn main() {
     let mut rng = rand::thread_rng();
     loop {
         ::std::thread::sleep(::std::time::Duration::from_secs(1));
-        ss.send((rng.gen::<f64>(), rng.gen::<f64>()));
+        mg.send((rng.gen::<f64>(), rng.gen::<f64>()));
     }
 }
 ```
