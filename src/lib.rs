@@ -16,6 +16,7 @@ use std::path::Path;
 use iron::Iron;
 use std::collections::VecDeque;
 use std::sync::{Arc, Mutex};
+use std::net::ToSocketAddrs;
 
 fn unix_time_now() -> i64 {
     unix_time_format_ms(time::get_time())
@@ -137,15 +138,16 @@ impl<T> ws::Handler for SsHandler<T>
     }
 }
 
-pub fn init<T>() -> Ss<T>
-    where T: serde::Serialize + serde::Deserialize + Send + 'static
+pub fn init<T, A>(addr: A) -> Ss<T>
+    where T: serde::Serialize + serde::Deserialize + Send + 'static,
+          A: ToSocketAddrs + Send + 'static
 {
     // Static file server
     ::std::thread::spawn(|| {
         let dir = concat!(env!("CARGO_MANIFEST_DIR"), "/public");
         let mut mount = Mount::new();
         mount.mount("/", Static::new(Path::new(dir)));
-        Iron::new(mount).http("localhost:3000").unwrap();
+        Iron::new(mount).http(addr).unwrap();
     });
 
     let ss = Ss::new();
