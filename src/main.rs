@@ -7,6 +7,10 @@ fn main() {
     let mut rng = rand::thread_rng();
     loop {
         ::std::thread::sleep(::std::time::Duration::from_secs(1));
-        ss.send((rng.gen::<f64>(), rng.gen::<f64>()));
+        if rng.gen() {
+            ss.send((rng.gen::<f64>(), Some(rng.gen::<f64>() * 100.0), rng.gen::<f64>() + 2.0));
+        } else {
+            ss.send((rng.gen::<f64>(), None, rng.gen::<f64>() + 2.0));
+        }
     }
 }
