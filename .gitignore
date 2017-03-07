@@ -8,5 +8,3 @@ Cargo.lock
 target
 
 .DS_Store
-
-public/js/*.js
