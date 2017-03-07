@@ -41,28 +41,31 @@ function getValueAtDim(data, d) {
         alert("unsupported data type");
     }
 }
-var SS = (function () {
-    function SS(addr) {
+var MetricsGraphics = (function () {
+    function MetricsGraphics(addr) {
         var _this = this;
         this.socket = new WebSocket(addr);
         this.socket.onmessage = function (e) { return _this.appendDataFromWSEvent(e); };
         this.data = [];
         this.live = true;
+        this.timer = setInterval(this.draw.bind(this), 1000);
     }
-    SS.prototype.stop = function () {
+    MetricsGraphics.prototype.stop = function () {
         // push null to every one
         for (var i = 0, len = this.data.length; i < len; i++) {
             this.data[i].push({ 'date': this.last_date, 'value': null });
         }
         this.live = false;
         this.socket.onmessage = null;
+        clearInterval(this.timer);
     };
-    SS.prototype.start = function () {
+    MetricsGraphics.prototype.start = function () {
         var _this = this;
         this.live = true;
         this.socket.onmessage = function (e) { return _this.appendDataFromWSEvent(e); };
+        this.timer = setInterval(this.draw.bind(this), 1000);
     };
-    SS.prototype.appendDataFromWSEvent = function (event) {
+    MetricsGraphics.prototype.appendDataFromWSEvent = function (event) {
         var data = JSON.parse(event.data);
         var dim = getContentDim(data);
         if (dim != this.dim) {
@@ -87,9 +90,8 @@ var SS = (function () {
             }
             this.last_date = data.date;
         }
-        this.draw();
     };
-    SS.prototype.draw = function () {
+    MetricsGraphics.prototype.draw = function () {
         var one_minute = 60 * 1000; // ms
         var now = new Date();
         var last_minute = function (d) { return (now.valueOf() - d.date.valueOf()) < one_minute; };
@@ -114,16 +116,16 @@ var SS = (function () {
             }
         }
     };
-    return SS;
+    return MetricsGraphics;
 }());
-var ss = new SS("ws://" + window.location.hostname + ":3012");
+var mg = new MetricsGraphics("ws://" + window.location.hostname + ":3012");
 function toggleLive() {
-    if (ss.live) {
-        ss.stop();
+    if (mg.live) {
+        mg.stop();
         $("#stopButton").html("Resume");
     }
     else {
-        ss.start();
+        mg.start();
         $("#stopButton").html("Stop");
     }
 }

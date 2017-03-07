@@ -44,7 +44,7 @@ function getValueAtDim(data, d) {
     }
 }
 
-class SS {
+class MetricsGraphics {
     private socket: WebSocket;
 
     live: boolean;
@@ -53,12 +53,16 @@ class SS {
     dim: number;
     last_date: Date;
 
+    timer;
+
     constructor(addr) {
         this.socket = new WebSocket(addr);
         this.socket.onmessage = (e: MessageEvent) => this.appendDataFromWSEvent(e);
 
         this.data = [];
         this.live = true;
+
+        this.timer = setInterval(this.draw.bind(this), 1000);
     }
 
     stop() {
@@ -68,11 +72,15 @@ class SS {
         }
         this.live = false;
         this.socket.onmessage = null;
+
+        clearInterval(this.timer);
     }
 
     start() {
         this.live = true;
         this.socket.onmessage = (e) => this.appendDataFromWSEvent(e);
+
+        this.timer = setInterval(this.draw.bind(this), 1000);
     }
 
     appendDataFromWSEvent(event: MessageEvent) {
@@ -100,8 +108,6 @@ class SS {
             }
             this.last_date = data.date;
         }
-
-        this.draw();
     }
 
     draw() {
@@ -132,14 +138,14 @@ class SS {
     }
 }
 
-let ss = new SS("ws://" + window.location.hostname + ":3012");
+let mg = new MetricsGraphics("ws://" + window.location.hostname + ":3012");
 
 function toggleLive() {
-    if (ss.live) {
-        ss.stop();
+    if (mg.live) {
+        mg.stop();
         $("#stopButton").html("Resume");
     } else {
-        ss.start();
+        mg.start();
         $("#stopButton").html("Stop");
     }
 }
