@@ -155,7 +155,7 @@ pub fn init<T, A>(addr: A) -> MetricGraphics<T>
     // Websocket thread
     let mut mg_clone = mg.clone();
     ::std::thread::spawn(move || {
-        if let Err(error) = listen("127.0.0.1:3012", |out| mg_clone.handle(out)) {
+        if let Err(error) = listen("0.0.0.0:3012", |out| mg_clone.handle(out)) {
             println!("Failed to create WebSocket due to {:?}", error);
         }
     });
